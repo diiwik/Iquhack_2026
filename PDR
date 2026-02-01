@@ -1,0 +1,165 @@
+1. Problem Statement
+
+The Low Autocorrelation Binary Sequence (LABS) problem is a combinatorial optimization task with applications in radar, communications, and signal processing. Classical solvers such as Memetic Tabu Search (MTS) achieve strong performance but still exhibit exponential scaling, making large problem sizes computationally expensive.
+
+Near-term quantum devices cannot yet solve LABS end-to-end due to:
+
+Limited qubit counts
+
+Noise
+
+Circuit depth constraints
+
+There is a need for a hybrid quantum–classical approach that provides practical, near-term performance gains without requiring fault-tolerant quantum hardware.
+
+2. Product Vision
+
+Use quantum computation as a structured global sampler to generate high-quality candidate solutions, which are then refined classically using MTS.
+
+The quantum component does not replace classical optimization — it enhances it.
+
+3. Goals & Success Metrics
+Primary Goals
+
+Improve convergence speed of classical MTS
+
+Bias search toward low-energy LABS configurations
+
+Maintain validity of all generated solutions
+
+Success Metrics
+
+Lower LABS energy compared to random initialization
+
+Reduced MTS iterations to reach comparable solutions
+
+Stable execution on NISQ-era simulators / hardware
+
+Correct mapping from LABS Hamiltonian → quantum circuit
+
+4. Target Users
+
+Quantum computing researchers
+
+Optimization researchers
+
+Hackathon participants
+
+CUDA-Q users exploring hybrid workflows
+
+5. Functional Requirements
+FR-1: LABS Hamiltonian Construction
+
+Convert LABS cost function into an Ising Hamiltonian
+
+Support arbitrary sequence length 
+𝑁
+N
+
+Include:
+
+Two-body (ZZ) interactions
+
+Four-body (ZZZZ) interactions
+
+FR-2: Interaction Set Generation
+
+Generate interaction index sets:
+
+G2: two-body terms
+
+G4: four-body terms
+
+Use 0-based indexing
+
+Match analytical loop limits from LABS expansion
+
+FR-3: Quantum Circuit Components
+FR-3.1 Two-Qubit Operator Kernel
+
+Implement Pauli-string rotations using:
+
+Basis rotations
+
+RZZ entangling gates
+
+Must support time-dependent coefficients
+
+FR-3.2 Four-Qubit Operator Kernel
+
+Implement structured four-qubit CD block
+
+Exactly match the paper’s FIG. 4 decomposition
+
+Ensure:
+
+One θ per Pauli string
+
+Clean uncomputation
+
+No residual entanglement
+
+FR-4: Trotterized Time Evolution
+
+Support first-order Trotterization
+
+Apply:
+
+All 2-body terms per step
+
+All 4-body terms per step
+
+Accept time-dependent coefficient schedule
+
+FR-5: Quantum Sampling
+
+Measure final quantum state
+
+Output bitstrings of length 
+𝑁
+N
+
+Ensure all outputs are valid LABS candidates
+
+FR-6: Classical Optimization (MTS)
+
+Accept quantum-generated bitstrings as initial population
+
+Perform:
+
+Tabu local search
+
+Controlled mutation
+
+Elitism
+
+Return best solution and energy
+
+6. Non-Functional Requirements
+Performance
+
+Must scale to 
+𝑁
+≈
+20
+–
+30
+N≈20–30 on simulators
+
+Circuit depth proportional to:
+
+Number of Trotter steps
+
+Size of G2 and G4
+
+Correctness
+
+Quantum evolution must preserve solution space
+
+Measurement outputs must always map to valid LABS sequences
+
+Modularity
+
+Quantum and classical components must be separable
+
+Kernels reusable for other Ising-type problems
